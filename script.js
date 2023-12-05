@@ -4,12 +4,18 @@ const fullScreenBtn = document.querySelector(".full-screen-btn");
 const miniPlayerBtn = document.querySelector(".mini-player-btn");
 const video = document.querySelector("video");
 const videoContainer = document.querySelector(".video-container");
+const muteButton = document.querySelector(".mute-btn");
+const volumeSlider = document.querySelector(".volume-slider");
 
 playBtn.addEventListener("click", togglePlayPause);
 
 document.addEventListener("keydown", (e) => {
+  const tagName = document.activeElement.tagName.toLowerCase();
+
+  if (tagName === "input") return;
   switch (e.key.toLowerCase()) {
     case " ":
+      if (tagName === "button") return;
     case "k":
       togglePlayPause();
       break;
@@ -21,6 +27,9 @@ document.addEventListener("keydown", (e) => {
       break;
     case "i":
       toggleMiniPlayerMode();
+      break;
+    case "m":
+      toggleMute();
       break;
   }
 });
@@ -46,6 +55,7 @@ miniPlayerBtn.addEventListener("click", toggleMiniPlayerMode);
 function toggleTheaterMode() {
   videoContainer.classList.toggle("theatre");
 }
+
 function toggleFullScreenMode() {
   if (document.fullscreenElement == null) {
     videoContainer.requestFullscreen();
@@ -73,3 +83,31 @@ video.addEventListener("enterpictureinpicture", () => {
 video.addEventListener("leavepictureinpicture", () => {
   videoContainer.classList.remove("mini-player");
 });
+
+muteButton.addEventListener("click", toggleMute);
+
+volumeSlider.addEventListener("input", (e) => {
+  video.volume = e.target.value;
+  video.muted = e.target.value === 0;
+});
+
+function toggleMute() {
+  video.muted = !video.muted;
+}
+
+video.addEventListener("volumechange", () => {
+  volumeSlider.value = video.volume;
+  let volumeLevel;
+  if (video.muted || video.volume === 0) {
+    volumeLevel = "muted";
+    volumeSlider.value = 0;
+  } else if (video.volume >= 0.5) {
+    volumeLevel = "high";
+  } else {
+    volumeLevel = "low";
+  }
+
+  videoContainer.dataset.volumeLevel = volumeLevel;
+});
+
+//46:05
