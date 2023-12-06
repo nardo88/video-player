@@ -6,6 +6,10 @@ const video = document.querySelector("video");
 const videoContainer = document.querySelector(".video-container");
 const muteButton = document.querySelector(".mute-btn");
 const volumeSlider = document.querySelector(".volume-slider");
+const currentTime = document.querySelector(".current-time");
+const totalaTime = document.querySelector(".total-time");
+const captionsBtn = document.querySelector(".captions-btn");
+const speedBtn = document.querySelector(".speed-btn");
 
 playBtn.addEventListener("click", togglePlayPause);
 
@@ -30,6 +34,17 @@ document.addEventListener("keydown", (e) => {
       break;
     case "m":
       toggleMute();
+      break;
+    case "arrowleft":
+    case "j":
+      skip(-5);
+      break;
+    case "arrowright":
+    case "l":
+      skip(5);
+      break;
+    case "c":
+      toggleCaptions();
       break;
   }
 });
@@ -110,4 +125,53 @@ video.addEventListener("volumechange", () => {
   videoContainer.dataset.volumeLevel = volumeLevel;
 });
 
-//46:05
+video.addEventListener("loadeddata", () => {
+  totalaTime.textContent = formatDuration(video.duration);
+});
+
+video.addEventListener("timeupdate", () => {
+  currentTime.textContent = formatDuration(video.currentTime);
+});
+
+const leadingZeroFormater = new Intl.NumberFormat(undefined, {
+  minimumIntegerDigits: 2,
+});
+function formatDuration(time) {
+  const seconds = Math.floor(time % 60);
+  const minutes = Math.floor((time / 60) % 60);
+  const hourse = Math.floor((time / 3600) & 60);
+
+  if (hourse === 0) {
+    return `${minutes}:${leadingZeroFormater.format(seconds)}`;
+  } else {
+    return `${hourse}:${leadingZeroFormater.format(
+      minutes
+    )}:${leadingZeroFormater.format(seconds)}`;
+  }
+}
+
+function skip(duration) {
+  video.currentTime += duration;
+}
+
+const captions = video.textTracks[0];
+captions.mode = "hidden";
+captionsBtn.addEventListener("click", toggleCaptions);
+
+function toggleCaptions() {
+  const isHidden = captions.mode === "hidden";
+  console.log("isHidden: ", isHidden);
+  captions.mode = isHidden ? "showing" : "hidden";
+  videoContainer.classList.toggle("captions", isHidden);
+}
+
+speedBtn.addEventListener("click", changePlaybackSpeed);
+
+function changePlaybackSpeed() {
+  let newPlaybackSpeed = video.playbackRate + 0.25;
+  if (newPlaybackSpeed > 2) newPlaybackSpeed = 0.25;
+  video.playbackRate = newPlaybackSpeed;
+  speedBtn.textContent = `${newPlaybackSpeed}x`;
+}
+
+// 1:00:22
