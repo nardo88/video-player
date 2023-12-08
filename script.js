@@ -10,6 +10,33 @@ const currentTime = document.querySelector(".current-time");
 const totalaTime = document.querySelector(".total-time");
 const captionsBtn = document.querySelector(".captions-btn");
 const speedBtn = document.querySelector(".speed-btn");
+const previewImg = document.querySelector(".preview-img");
+const thumbnailImg = document.querySelector(".thumbnail-img");
+const timeLineContainer = document.querySelector(".timeline-container");
+
+// TimeLine
+
+timeLineContainer.addEventListener("mousemove", handleTimelineUpdate);
+
+function handleTimelineUpdate(e) {
+  const rect = timeLineContainer.getBoundingClientRect();
+  const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+  const previewImgNumber = Math.max(
+    1,
+    Math.floor((percent * video.duration) / 10)
+  );
+  const previewImage = `/assets/previewIms/preview${previewImgNumber}.jpg`;
+  previewImg.src = previewImage;
+
+  timeLineContainer.style.setProperty("--preview-position", percent);
+
+  if (isScrubbing) {
+    e.preventDefault();
+    thumbnailImg.src = previewImage;
+    timeLineContainer.style.setProperty("--progress-position", percent);
+  }
+}
+// ===================
 
 playBtn.addEventListener("click", togglePlayPause);
 
@@ -131,6 +158,8 @@ video.addEventListener("loadeddata", () => {
 
 video.addEventListener("timeupdate", () => {
   currentTime.textContent = formatDuration(video.currentTime);
+  const percent = video.currentTime / video.duration;
+  timeLineContainer.style.setProperty("--progress-position", percent);
 });
 
 const leadingZeroFormater = new Intl.NumberFormat(undefined, {
@@ -174,4 +203,4 @@ function changePlaybackSpeed() {
   speedBtn.textContent = `${newPlaybackSpeed}x`;
 }
 
-// 1:00:22
+// 1:18:15
